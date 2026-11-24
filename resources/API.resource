@@ -15,7 +15,11 @@ Check the Server Health
 
 Login to the server
     [Documentation]  This keyword login into the api server with pass credintial based on the use case, then assert on the expected status code finally returns the new token 
-    [Arguments]     ${username}     ${password}      ${expected_status}
+    [Arguments]     ${username}     ${password}      ${expected_status}    ${response_failure_details}=${None}
     ${body}=         Create Dictionary    username=${username}    password=${password}
     ${response}=     POST                 url=${application_endpoint_url}/login         json=${body}        expected_status=${expected_status}
-    RETURN     ${response.json()}[token]
+    IF     ${response.status_code} == 200
+        RETURN     ${response.json()}[token]
+    ELSE
+        Should Be Equal           ${response.json()}[detail]        ${response_failure_details}
+    END

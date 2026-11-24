@@ -1,4 +1,5 @@
 *** Settings ***
+Library            Collections
 Resource           ../resources/API.resource
 Resource           ../resources/Common/APICommon.resource
 
@@ -8,9 +9,15 @@ Suite Setup       Start the API Server for hosting the app
 Suite Teardown    Stop the API Server that hosts the app
 
 *** Variables ***
+# a list that holds all generated tokens from the api server
+@{TOKENS}    
 ${Valid_username}=     alice
 ${Valid_password}=     secret
-${E_OK}=               200
+${Invalid_username}=     wrong
+${Invalid_password}=     wrong
+${E_OK}=               200 
+${Invalid_userOrPass_E_NOK}=     401
+${Invalid_userOrPass_detail}=     Invalid credentials
 *** Test Cases ***
 Verify the Server Health while running
     [Tags]    smoke    001    
@@ -20,4 +27,11 @@ Verify the Server Health while running
 
 Verify Login with valid credintials
     [Tags]    smoke    002
-    Login to the server     username=${Valid_username}     password=${Valid_password}    expected_status=${E_OK}
+    [Documentation]
+    ${Token}=    Login to the server     username=${Valid_username}     password=${Valid_password}    expected_status=${E_OK}
+    Append To List    ${TOKENS}        ${Token}
+
+Verify Login with invalid credintials
+    [Tags]    full    003
+    [Documentation]
+    Login to the server     username=${Invalid_username}     password=${Invalid_password}    expected_status=${Invalid_userOrPass_E_NOK}     response_failure_details=${Invalid_userOrPass_detail}
