@@ -1,5 +1,5 @@
 .venv/
 __pycache__/
-noutput.xml
-nlog.html
-nreport.html
+output.xml
+log.html
+report.html
