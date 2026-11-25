@@ -23,3 +23,15 @@ Login to the server
     ELSE
         Should Be Equal           ${response.json()}[detail]        ${response_failure_details}
     END
+
+Login to the server with missing credintials
+    [Documentation]  This keyword login injects the missing credintials issue 
+    [Arguments]    ${username}     ${password}    ${expected_status}    ${Missing_username_flag}=False    ${Missing_password_flag}=False     
+    IF         ${Missing_username_flag} == True
+        ${body}=         Create Dictionary    password=${password}
+    ELSE IF     ${Missing_password_flag} == True
+        ${body}=         Create Dictionary    username=${username} 
+    ELSE 
+        ${body}=         Create Dictionary    username=${username}    password=${password}
+    END
+    ${response}=     POST                 url=${application_endpoint_url}/login         json=${body}        expected_status=${expected_status}
