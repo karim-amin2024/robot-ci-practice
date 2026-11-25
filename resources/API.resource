@@ -25,7 +25,7 @@ Login to the server
     END
 
 Login to the server with missing credintials
-    [Documentation]  This keyword login injects the missing credintials issue 
+    [Documentation]  This keyword login injects the missing credintials issue based on the input missing flags
     [Arguments]    ${username}     ${password}    ${expected_status}    ${Missing_username_flag}=False    ${Missing_password_flag}=False     
     IF         ${Missing_username_flag} == True
         ${body}=         Create Dictionary    password=${password}
@@ -35,3 +35,23 @@ Login to the server with missing credintials
         ${body}=         Create Dictionary    username=${username}    password=${password}
     END
     ${response}=     POST                 url=${application_endpoint_url}/login         json=${body}        expected_status=${expected_status}
+    Should Be Equal     ${response.json()}[detail][0][msg]    Field required
+    IF         ${Missing_username_flag} == True
+        Should Be Equal     ${response.json()}[detail][0][loc][1]    username
+    ELSE IF     ${Missing_password_flag} == True
+        Should Be Equal     ${response.json()}[detail][0][loc][1]    password
+    END
+     
+Register New User to the Server Data base
+    [Documentation]  This keyword is for creating a new user credintials and add it to the data base
+    [Arguments]    ${username}     ${password}    ${expected_status}     ${Missing_username_flag}=False
+    IF     ${Missing_username_flag}==False
+        ${body}=        Create Dictionary    username=${username}    password=${password}
+    ELSE 
+        ${body}=        Create Dictionary    password=${password}
+    END
+    ${response}=    POST                url=${application_endpoint_url}/register        json=${body}        expected_status=${expected_status}
+    # Assert on the return username which was created and stored in the server
+    IF    ${Missing_username_flag}==False
+        Should Be Equal     ${response.json()}[username]       ${username}  
+    END
